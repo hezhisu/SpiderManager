@@ -1,0 +1,527 @@
+{% extends "base.html" %}
+{% block csscontent %}
+<link rel="stylesheet"
+      href="{{ url_for('static',filename='plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css') }}">
+
+{% endblock %}
+
+{% block menu %}
+{% include "menu.html" %}
+<!-- Your Page Content Here -->
+{% endblock %}
+
+{% block content %}
+<section class="content">
+    <div class="box box-info">
+        <div class="box-header with-border">
+            <h3 class="box-title">微博账号</h3>
+            <div class="pull-right box-tools">
+                <button id="btn_add_weibo_account" class="btn btn-info btn-sm" data-toggle="tooltip">添加</button>
+            </div>
+        </div>
+        <!-- form start -->
+        <div class="box-body">
+            <table id="table_weibo_accounts" class="table table-bordered table-hover dataTable text-center" role="grid"
+                   aria-describedby="example2_info" cellspacing="0" width="100%">
+                <thead>
+                <tr>
+                    <th>账号</th>
+                    <th>密码</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                {% for account in task.weibo_accounts %}
+                <tr>
+                    <td>{{ account.account }}</td>
+                    <td>{{ account.password }}</td>
+                    <td><a class="btn btn-danger btn-xs btn_delete_account"><i class="icon-edit"></i>删除</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+    <label></label>
+    <div class="row">
+        <div class="col-lg-3 col-xs-6">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">爬取微博用户列表</h3>
+                    <div class="pull-right box-tools">
+                        <button id="btn_add_spider_user" class="btn btn-info btn-sm" data-toggle="tooltip">添加
+                        </button>
+                    </div>
+                </div>
+                <!-- form start -->
+                <div class="box-body">
+                    <table id="table_spider_user_ids" class="table table-bordered table-hover dataTable text-center"
+                           role="grid"
+                           aria-describedby="example2_info" cellspacing="0" width="100%">
+                        <thead>
+                        <tr>
+                            <th>用户ID</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        {% for id in task.spider_user_ids %}
+                        <tr>
+                            <td>{{ id }}</td>
+                            <td><a class="btn btn-danger btn-xs btn_delete_spider_user"><i class="icon-edit"></i>删除</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-xs-6">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">邮箱列表</h3>
+                    <div class="pull-right box-tools">
+                        <button id="btn_add_mail" class="btn btn-info btn-sm" data-toggle="tooltip">添加</button>
+                    </div>
+                </div>
+                <!-- form start -->
+                <div class="box-body">
+                    <table id="table_mail_list" class="table table-bordered table-hover dataTable text-center"
+                           role="grid"
+                           aria-describedby="example2_info" cellspacing="0" width="100%">
+                        <thead>
+                        <tr>
+                            <th>邮箱</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        {% for mail in task.mail_list %}
+                        <tr>
+                            <td>{{ mail }}</td>
+                            <td><a class="btn btn-danger btn-xs btn_delete_mail"><i class="icon-edit"></i>删除</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-xs-6">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">关键字列表</h3>
+                    <div class="pull-right box-tools">
+                        <button id="btn_add_keyword" class="btn btn-info btn-sm" data-toggle="tooltip">添加</button>
+                    </div>
+                </div>
+                <!-- form start -->
+                <div class="box-body">
+                    <table id="table_keywords" class="table table-bordered table-hover dataTable text-center"
+                           role="grid"
+                           aria-describedby="example2_info" cellspacing="0" width="100%">
+                        <thead>
+                        <tr>
+                            <th>关键字</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        {% for keyword in task.spider_keywords %}
+                        <tr>
+                            <td>{{ keyword }}</td>
+                            <td><a class="btn btn-danger btn-xs btn_delete_keywords"><i class="icon-edit"></i>删除</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-xs-6">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">否定关键字列表</h3>
+                    <div class="pull-right box-tools">
+                        <button id="btn_add_extra_keywords" class="btn btn-info btn-sm" data-toggle="tooltip">添加</button>
+                    </div>
+                </div>
+                <!-- form start -->
+                <div class="box-body">
+                    <table id="table_extra_keywords" class="table table-bordered table-hover dataTable text-center"
+                           role="grid"
+                           aria-describedby="example2_info" cellspacing="0" width="100%">
+                        <thead>
+                        <tr>
+                            <th>否定关键字</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        {% for keyword in task.spider_extra_keywords %}
+                        <tr>
+                            <td>{{ keyword }}</td>
+                            <td><a class="btn btn-danger btn-xs btn_delete_extra_keywords"><i class="icon-edit"></i>删除</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-4 col-xs-6"></div>
+        <div class="col-lg-4 col-xs-6">
+            <button type="button" class="btn btn-block btn-primary btn-lg" id="btn_start_task">开启任务</button>
+        </div>
+        <div class="col-lg-4 col-xs-6"></div>
+    </div>
+    <div id="modal_add_weibo_account" class="modal fade modal-xs" tabindex="-1" role="dialog"
+         aria-labelledby="mySmallModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span
+                            class="sr-only">Close</span></button>
+                    <h4 class="modal-title">添加微博账号</h4>
+                </div>
+                <div class="modal-body">
+                    <input id="input_account" type="text" class="form-control" autocomplete="off" placeholder="账号">
+                    <br>
+                    <input id="input_password" type="text" class="form-control" autocomplete="off" placeholder="密码">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button id="btn_modal_add_weibo_account" type="button" class="btn btn-primary">添加</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <div id="modal_add_spider_user" class="modal fade modal-xs" tabindex="-1" role="dialog"
+         aria-labelledby="mySmallModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span
+                            class="sr-only">Close</span></button>
+                    <h4 class="modal-title">添加爬取用户</h4>
+                </div>
+                <div class="modal-body">
+                    <input id="input_spider_user_id" type="text" class="form-control" autocomplete="off" placeholder="用户ID">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button id="btn_modal_add_spider_user" type="button" class="btn btn-primary">添加</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <div id="modal_add_mail" class="modal fade modal-xs" tabindex="-1" role="dialog"
+         aria-labelledby="mySmallModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span
+                            class="sr-only">Close</span></button>
+                    <h4 class="modal-title">添加邮箱</h4>
+                </div>
+                <div class="modal-body">
+                    <input id="input_mail" type="text" class="form-control" autocomplete="off" placeholder="邮箱">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button id="btn_modal_add_mail" type="button" class="btn btn-primary">添加</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <div id="modal_add_keywords" class="modal fade modal-xs" tabindex="-1" role="dialog"
+         aria-labelledby="mySmallModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span
+                            class="sr-only">Close</span></button>
+                    <h4 class="modal-title">添加关键字</h4>
+                </div>
+                <div class="modal-body">
+                    <input id="input_keywords" type="text" class="form-control" autocomplete="off" placeholder="关键字">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button id="btn_modal_add_keywords" type="button" class="btn btn-primary">添加</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <div id="modal_add_extra_keywords" class="modal fade modal-xs" tabindex="-1" role="dialog"
+         aria-labelledby="mySmallModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span
+                            class="sr-only">Close</span></button>
+                    <h4 class="modal-title">添加否定关键字</h4>
+                </div>
+                <div class="modal-body">
+                    <input id="input_extra_keywords" type="text" class="form-control" autocomplete="off" placeholder="否定关键字">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button id="btn_modal_add_extra_keywords" type="button" class="btn btn-primary">添加</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+</section>
+{% endblock %}
+
+{% block jscontent %}
+<!-- DataTables -->
+<script src="{{ url_for('static',filename='plugins/datatables/jquery.dataTables.min.js') }}"></script>
+<script src="{{ url_for('static',filename='plugins/datatables/dataTables.bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static',filename='plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js') }}"></script>
+<script>
+    var table_account = $('#table_weibo_accounts').DataTable({
+        "serverSide": false,
+        "paging": false,
+        "lengthChange": false,
+        "searching": false,
+        "ordering": false,
+        "info":false
+    });
+    var table_spider_user = $('#table_spider_user_ids').DataTable({
+        "serverSide": false,
+        "paging": false,
+        "lengthChange": false,
+        "searching": false,
+        "ordering": false,
+        "info":false
+    });
+    var table_mail = $('#table_mail_list').DataTable({
+        "serverSide": false,
+        "paging": false,
+        "lengthChange": false,
+        "searching": false,
+        "ordering": false,
+        "info":false
+    });
+    var table_keywords = $('#table_keywords').DataTable({
+        "serverSide": false,
+        "paging": false,
+        "lengthChange": false,
+        "searching": false,
+        "ordering": false,
+        "info":false
+    });
+    var table_extra_keywords = $('#table_extra_keywords').DataTable({
+        "serverSide": false,
+        "paging": false,
+        "lengthChange": false,
+        "searching": false,
+        "ordering": false,
+        "info":false
+    });
+    $(function () {
+        $("#btn_start_task").click(function () {
+            $.ajax({
+                url: 'http://47.93.191.41:5000/spider/api/v1/tasks',
+                type: 'GET',
+                data: {
+                    user_id: '{{manager['_id']['$oid']}}'
+                },
+                success: function (result) {
+                    $.ajax({
+                        url: 'http://127.0.0.1:8000/start/task',
+                        type: 'POST',
+                        data: {
+                            task_json: JSON.stringify(result)
+                        },
+                        success: function (result) {
+                            alert(JSON.stringify(result))
+
+                        },
+                        error: function (result) {
+                            alert(result.responseJSON.error)
+                        }
+                    });
+
+                },
+                error:function (result) {
+                    alert(result.responseJSON.error)
+                }
+            });
+        });
+
+        $("#btn_add_weibo_account").click(function () {
+            $("#modal_add_weibo_account").modal("toggle");
+        });
+        $("#btn_modal_add_weibo_account").click(function () {
+            $.ajax({
+                url: 'http://47.93.191.41:5000/spider/api/v1/tasks/' + '{{ task.id }}/weibo_accounts',
+                type: 'POST',
+                data: {
+                    account: $("#input_account").val(),
+                    password: $("#input_password").val()
+                },
+                success: function (result) {
+                    $("#modal_add_weibo_account").modal("hide");
+                    table_account.row.add([
+                        $("#input_account").val(),
+                        $("#input_password").val(),
+                        '<a class="btn btn-danger btn-xs btn_delete_account"><i class="icon-edit"></i>删除</a>'
+                    ]).draw(false);
+                    $('#input_account').val("");
+                    $('#input_password').val("");
+                }
+            });
+        });
+        $("#btn_add_spider_user").click(function () {
+                $("#modal_add_spider_user").modal("toggle");
+        });
+        $("#btn_modal_add_spider_user").click(function () {
+            $.ajax({
+                url: 'http://47.93.191.41:5000/spider/api/v1/tasks/' + '{{ task.id }}/spider_users',
+                type: 'POST',
+                data: {
+                    user_id: $("#input_spider_user_id").val()
+                },
+                success: function (result) {
+                    $("#modal_add_spider_user").modal("hide");
+                    table_spider_user.row.add([
+                        $("#input_spider_user_id").val(),
+                        '<a class="btn btn-danger btn-xs btn_delete_spider_user"><i class="icon-edit"></i>删除</a>'
+                    ]).draw(false);
+                    $('#input_spider_user_id').val("");
+                }
+            });
+        });
+
+
+        $("#btn_add_mail").click(function () {
+            $("#modal_add_mail").modal("toggle");
+        });
+        $("#btn_modal_add_mail").click(function () {
+            $.ajax({
+                url: 'http://47.93.191.41:5000/spider/api/v1/tasks/' + '{{ task.id }}/mails',
+                type: 'POST',
+                data: {
+                    mail: $("#input_mail").val()
+                },
+                success: function (result) {
+                    $("#modal_add_mail").modal("hide");
+                    table_mail.row.add([
+                        $("#input_mail").val(),
+                        '<a class="btn btn-danger btn-xs btn_delete_mail"><i class="icon-edit"></i>删除</a>'
+                    ]).draw(false);
+                    $('#input_mail').val("");
+                }
+            });
+        });
+
+        $("#btn_add_keyword").click(function () {
+            $("#modal_add_keywords").modal("toggle");
+        });
+        $("#btn_modal_add_keywords").click(function () {
+            $.ajax({
+                url: 'http://47.93.191.41:5000/spider/api/v1/tasks/' + '{{ task.id }}/spider_keywords',
+                type: 'POST',
+                data: {
+                    keyword: $("#input_keywords").val()
+                },
+                success: function (result) {
+                    $("#modal_add_keywords").modal("hide");
+                    table_keywords.row.add([
+                        $("#input_keywords").val(),
+                        '<a class="btn btn-danger btn-xs btn_delete_keywords"><i class="icon-edit"></i>删除</a>'
+                    ]).draw(false);
+                    $('#input_keywords').val("");
+                }
+            });
+        });
+
+        $("#btn_add_extra_keywords").click(function () {
+            $("#modal_add_extra_keywords").modal("toggle");
+        });
+        $("#btn_modal_add_extra_keywords").click(function () {
+            $.ajax({
+                url: 'http://47.93.191.41:5000/spider/api/v1/tasks/' + '{{ task.id }}/spider_extra_keywords',
+                type: 'POST',
+                data: {
+                    extra_keyword: $("#input_extra_keywords").val()
+                },
+                success: function (result) {
+                    $("#modal_add_extra_keywords").modal("hide");
+                    table_extra_keywords.row.add([
+                        $("#input_extra_keywords").val(),
+                        '<a class="btn btn-danger btn-xs btn_delete_extra_keywords"><i class="icon-edit"></i>删除</a>'
+                    ]).draw(false);
+                    $('#input_extra_keywords').val("");
+                }
+            });
+        });
+
+    });
+    $(document).on("click", ".btn_delete_account", function () {//取出当前行的数据
+        var row = $(this).parents('tr');
+        $.ajax({
+            url: 'http://47.93.191.41:5000/spider/api/v1/tasks/' + '{{ task.id }}/weibo_accounts',
+            type: 'DELETE',
+            data: {
+                account: row.children('td')[0].innerHTML
+            },
+            success: function (result) {
+                table_account.row(row).remove().draw()
+            }
+        });
+    });
+    $(document).on("click", ".btn_delete_spider_user", function () {//取出当前行的数据
+        var row = $(this).parents('tr');
+        $.ajax({
+            url: 'http://47.93.191.41:5000/spider/api/v1/tasks/' + '{{ task.id }}/spider_users',
+            type: 'DELETE',
+            data: {
+                user_id: row.children('td')[0].innerHTML
+            },
+            success: function (result) {
+                table_spider_user.row(row).remove().draw()
+            }
+        });
+    });
+    $(document).on("click", ".btn_delete_mail", function () {//取出当前行的数据
+        var row = $(this).parents('tr');
+        $.ajax({
+            url: 'http://47.93.191.41:5000/spider/api/v1/tasks/' + '{{ task.id }}/mails',
+            type: 'DELETE',
+            data: {
+                mail: row.children('td')[0].innerHTML
+            },
+            success: function (result) {
+                table_mail.row(row).remove().draw()
+            }
+        });
+    });
+    $(document).on("click", ".btn_delete_keywords", function () {//取出当前行的数据
+        var row = $(this).parents('tr');
+        $.ajax({
+            url: 'http://47.93.191.41:5000/spider/api/v1/tasks/' + '{{ task.id }}/spider_keywords',
+            type: 'DELETE',
+            data: {
+                keyword: row.children('td')[0].innerHTML
+            },
+            success: function (result) {
+                table_keywords.row(row).remove().draw()
+            }
+        });
+    });
+    $(document).on("click", ".btn_delete_extra_keywords", function () {//取出当前行的数据
+        var row = $(this).parents('tr');
+        $.ajax({
+            url: 'http://47.93.191.41:5000/spider/api/v1/tasks/' + '{{ task.id }}/spider_extra_keywords',
+            type: 'DELETE',
+            data: {
+                extra_keyword: row.children('td')[0].innerHTML
+            },
+            success: function (result) {
+                table_extra_keywords.row(row).remove().draw()
+            }
+        });
+    });
+</script>
+{% endblock %}

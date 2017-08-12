@@ -1,0 +1,66 @@
+<!-- Left side column. contains the logo and sidebar -->
+<aside class="main-sidebar">
+
+  <!-- sidebar: style can be found in sidebar.less -->
+  <section class="sidebar">
+
+	<!-- Sidebar user panel (optional) -->
+	<div class="user-panel">
+	  <div class="pull-left image">
+		<img src="{{ url_for('static',filename='img/user2-160x160.jpg') }}" class="img-circle" alt="User Image">
+	  </div>
+	  <div class="pull-left info">
+		<p>{{ manager['account'] }}</p>
+		<!-- Status -->
+		<a href="#"><i class="fa fa-circle text-success"></i> Online</a>
+	  </div>
+	</div>
+
+	<!-- search form (Optional) ∂-->
+	<form action="#" method="get" class="sidebar-form">
+	  <div class="input-group">
+		<input type="text" name="q" class="form-control" placeholder="Search...">
+		<span class="input-group-btn">
+		  <button type="submit" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i></button>
+		</span>
+	  </div>
+	</form>
+	<!-- /.search form -->
+
+	<!-- Sidebar Menu -->
+	<ul class="sidebar-menu">
+	  <li class="header">操作</li>
+	  <!-- Optionally, you can add icons to the links -->
+
+	  <li class="treeview active">
+		<a href="#"><i class="fa fa-bullhorn"></i><span>管理</span> <i class="fa fa-angle-left pull-right"></i></a>
+		<ul class="treeview-menu">
+		  {% if select_menu == 'manage_task' %}
+			<li ><a href='/manage/task'><font color="#ffffff">任务管理</font></a></li>
+		  {% else %}
+			<li ><a href='/manage/task'>任务管理</a></li>
+		  {% endif %}
+		  {% if manager['is_manager'] %}
+			  {% if select_menu == 'manage_user' %}
+				<li ><a href='/manage/user'><font color="#ffffff">员工管理</font></a></li>
+			  {% else %}
+				<li ><a href='/manage/user'>员工管理</a></li>
+			  {% endif %}
+		  {% endif %}
+		  {% if manager['is_manager'] %}
+			  {% if select_menu == 'manage_device_code' %}
+				<li ><a href='/manage/device_code'><font color="#ffffff">机器码管理</font></a></li>
+			  {% else %}
+				<li ><a href='/manage/device_code'>机器码管理</a></li>
+			  {% endif %}
+		  {% endif %}
+		  {% if select_menu == 'manage_excel' %}
+			<li ><a href='/manage/excel'><font color="#ffffff">查看excel</font></a></li>
+		  {% else %}
+			<li ><a href='/manage/excel'>查看excel</a></li>
+		  {% endif %}
+		</ul>
+	</ul><!-- /.sidebar-menu -->
+  </section>
+  <!-- /.sidebar -->
+</aside>

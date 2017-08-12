@@ -1,0 +1,22 @@
+{
+    "weibo_accounts" : [
+        {
+            "account" : "18855408432",
+            "password" : "a00000000"
+        }
+    ],
+    "spider_user_ids" : [
+        "5538536107",
+        "1723931634"
+    ],
+    "spider_keywords" : [
+    ],
+    "spider_extra_keywords" : [
+    ],
+    "mail_list" : [
+        "379129087@qq.com"
+    ],
+    "spider_interval" : 13,
+    "switch_account_interval" : 7,
+    "belong_user_id" : "598a7a4d1e00a552f46d558b"
+}

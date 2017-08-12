@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block csscontent %}
+<link rel="stylesheet"
+      href="{{ url_for('static',filename='plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css') }}">
+
+{% endblock %}
+
+{% block menu %}
+{% include "menu.html" %}
+<!-- Your Page Content Here -->
+{% endblock %}
+
+{% block content %}
+<section class="content">
+    <div class="box box-info">
+        <div class="box-header with-border">
+            <h3 class="box-title">机器码</h3>
+            <div class="pull-right box-tools">
+                <button id="btn_add_device_code" class="btn btn-info btn-sm" data-toggle="tooltip">添加</button>
+            </div>
+        </div>
+        <!-- form start -->
+        <div class="box-body">
+            <table id="table_device_code" class="table table-bordered table-hover dataTable text-center" role="grid"
+                   aria-describedby="example2_info" cellspacing="0" width="100%">
+                <thead>
+                <tr>
+                    <th>机器码</th>
+                    <th>是否绑定</th>
+                    <th>绑定用户</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+    <div id="modal_bind_user" class="modal fade modal-xs" tabindex="-1" role="dialog"
+         aria-labelledby="mySmallModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span
+                            class="sr-only">Close</span></button>
+                    <h4 class="modal-title">绑定用户</h4>
+                </div>
+                <div class="modal-body">
+                    <input id="input_user_id" type="text" class="form-control" autocomplete="off" placeholder="用户ID">
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button id="btn_modal_bind_user" type="button" class="btn btn-primary">绑定</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+</section>
+{% endblock %}
+
+{% block jscontent %}
+<!-- DataTables -->
+<script src="{{ url_for('static',filename='plugins/datatables/jquery.dataTables.min.js') }}"></script>
+<script src="{{ url_for('static',filename='plugins/datatables/dataTables.bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static',filename='plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js') }}"></script>
+<script>
+    $(function () {
+
+        $("#btn_add_device_code").click(function () {
+            $.ajax({
+                url: 'http://47.93.191.41:5000/spider/api/v1/device_codes',
+                type: 'POST',
+                success: function (result) {
+                    $("#table_device_code").DataTable().ajax.reload();
+                },
+                error:function (result) {
+                    alert(result.responseJSON.error)
+                }
+            });
+        });
+        $("#btn_modal_bind_user").click(function () {
+            $.ajax({
+                url: 'http://47.93.191.41:5000/spider/api/v1/device_codes/' + $("#btn_modal_bind_user").attr("code_id"),
+                type: 'POST',
+                data: {
+                    user_id: $("#input_user_id").val()
+                },
+                success: function (result) {
+                    $("#modal_bind_user").modal("hide")
+                    $("#input_user_id").val('')
+                    $("#table_device_code").DataTable().ajax.reload();
+                },
+
+                error:function (result) {
+                    $("#modal_bind_user").modal("hide")
+                    $("#input_user_id").val('')
+                    alert(result.responseJSON.error)
+                }
+            });
+        });
+
+    });
+    $(document).ready(function () {
+        $('#table_device_code').DataTable({
+            "processing": true,
+            "serverSide": false,
+            "paging": false,
+            "lengthChange": false,
+            "searching": false,
+            "ordering": false,
+            "info":false,
+            "ajax": {
+                "url": "http://47.93.191.41:5000/spider/api/v1/device_codes",
+                "type": "get",
+            },
+            "columns": [
+                {
+                    data: function (e) {
+                        return "<label name='%s1'>%s2</label>".replace("%s1", e.id).replace("%s2", e.code);
+                    }
+                },
+                {
+                    data: function (e) {
+                        if(e.bind_user == "")
+                            return "否";
+                        else {
+                            return "是"
+                        }
+                    }
+                },
+                {
+                    data: function (e) {
+                        if(e.bind_user == "")
+                            return '<a class="btn btn-default btn-xs bind_user"><i class="icon-edit"></i>绑定用户</a>';
+                        else {
+                            return "<h5 name='%s1'>%s2</h5>".replace("%s1", e.bind_user).replace("%s2", e.bind_user_account);
+                        }
+
+                    }
+                },
+                {
+                    data: function (e) {
+                        if(e.bind_user != "") {
+                            return '<a class="btn btn-default btn-xs unbind_user"><i class="icon-edit"></i>解除绑定</a>';
+                        }else {
+                            return '';
+                        }
+
+                    }
+                }
+            ]
+
+        });
+
+    });
+    $(document).on("click", ".bind_user", function () {//取出当前行的数据
+        var code_id = $(this).parents('tr').children('td').children('label').attr('name');
+        $("#modal_bind_user").modal("toggle");
+        $("#btn_modal_bind_user").attr("code_id",code_id)
+    });
+    $(document).on("click", ".unbind_user", function () {//取出当前行的数据
+            var code_id = $(this).parents('tr').children('td').children('label').attr('name');
+            var user_id = $(this).parents('tr').children('td').children('h5').attr('name');
+            $.ajax({
+                url: 'http://47.93.191.41:5000/spider/api/v1/device_codes/' + code_id,
+                type: 'PUT',
+                data: {
+                    user_id: user_id
+                },
+                success: function (result) {
+                    $("#table_device_code").DataTable().ajax.reload();
+            }
+            });
+
+        });
+</script>
+{% endblock %}

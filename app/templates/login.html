@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>微博云控</title>
+	<!-- Tell the browser to be responsive to screen width -->
+	<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+	<!-- Bootstrap 3.3.5 -->
+	<link rel="stylesheet" href="{{ url_for('static',filename='bootstrap/css/bootstrap.min.css') }}">
+{#	<!-- Font Awesome -->#}
+{#	<link rel="stylesheet" href="{{ url_for('static',filename='fonts/font-awesome.min.css') }}">#}
+{#	<!-- Ionicons -->#}
+{#	<link rel="stylesheet" href="{{ url_for('static',filename='ionicons/ionicons.min.css') }}">#}
+{#	<!-- Theme style -->#}
+	<link rel="stylesheet" href="{{ url_for('static',filename='css/AdminLTE.min.css') }}">
+{#	<!-- iCheck -->#}
+{#	<link rel="stylesheet" href="{{ url_for('static',filename='plugins/iCheck/square/blue.css') }}">#}
+
+	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+	<!--[if lt IE 9]>
+	<![endif]-->
+  </head>
+  <body class="hold-transition login-page">
+	<div class="login-box">
+	  <div class="login-logo">
+		<span class="logo-lg"><b>微</b>博<b>云</b>控</span>
+	  </div><!-- /.login-logo -->
+	  <div class="login-box-body">
+		{% if erro == 0 %}
+		<p class="login-box-msg">欢迎回来</p>
+		{% else %}
+		<p class="login-box-msg"><font color="#f70f14">{{erromsg}}</font></p>
+		{% endif %}
+
+		<form action="/login" method="post">
+		  <div class="form-group has-feedback">
+			<input class="form-control" name="account" type="text" />
+			<span class="glyphicon glyphicon-envelope form-control-feedback"></span>
+		  </div>
+		  <div class="form-group has-feedback">
+			<input type="password" name="password" class="form-control">
+			<span class="glyphicon glyphicon-lock form-control-feedback"></span>
+		  </div>
+		  <div class="row">
+			<div class="col-xs-12">
+			  <button type="submit" class="btn btn-primary btn-block btn-flat">登录</button>
+			</div><!-- /.col -->
+		  </div>
+		</form>
+
+	  </div><!-- /.login-box-body -->
+	</div><!-- /.login-box -->
+
+	<!-- jQuery 2.1.4 -->
+	<script src="{{ url_for('static',filename='plugins/jQuery/jQuery-2.1.4.min.js') }}"></script>
+	<!-- Bootstrap 3.3.5 -->
+	<script src="{{ url_for('static',filename='bootstrap/js/bootstrap.min.js') }}"></script>
+  </body>
+</html>

@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% block csscontent %}
+<link rel="stylesheet"
+      href="{{ url_for('static',filename='plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css') }}">
+
+{% endblock %}
+
+{% block menu %}
+{% include "menu.html" %}
+<!-- Your Page Content Here -->
+{% endblock %}
+
+{% block content %}
+<section class="content">
+    <div class="box box-info">
+        <div class="box-header with-border">
+            <h3 class="box-title">用户列表</h3>
+            <div class="pull-right box-tools">
+                <button id="btn_add_user" class="btn btn-info btn-sm" data-toggle="tooltip">添加</button>
+            </div>
+        </div>
+        <!-- form start -->
+        <div class="box-body">
+            <table id="users_table" class="table table-bordered table-hover dataTable text-center" role="grid"
+                   aria-describedby="example2_info" cellspacing="0" width="100%">
+                <thead>
+                <tr>
+                    <th>账号</th>
+                    <th>电话</th>
+                    <th>邮箱</th>
+                    <th>创建时间</th>
+                    <th>机器码</th>
+                    <th>管理员</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+    <div id="modal_add_user" class="modal fade modal-xs" tabindex="-1" role="dialog"
+         aria-labelledby="mySmallModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span
+                            class="sr-only">Close</span></button>
+                    <h4 class="modal-title">添加用户</h4>
+                </div>
+                <div class="modal-body">
+                    <input id="input_account" type="text" class="form-control" autocomplete="off" placeholder="账号">
+                </div>
+                <div class="modal-body">
+                    <input id="input_password" type="text" class="form-control" autocomplete="off" placeholder="密码">
+                </div>
+                <div class="modal-body">
+                    <input id="input_phone" type="text" class="form-control" autocomplete="off" placeholder="手机">
+                </div>
+                <div class="modal-body">
+                    <input id="input_email" type="text" class="form-control" autocomplete="off" placeholder="邮箱">
+                </div>
+                <div class="modal-body">
+                    <input id="input_device_code" type="text" class="form-control" autocomplete="off" placeholder="机器码">
+                </div>
+                <div class="modal-body">
+                  <div class="radio">
+                    <label>
+                      <input type="radio" name="optionsRadios" id="radio_is_not_manager" value="false" checked="">
+                      非管理员
+                    </label>
+                  </div>
+                  <div class="radio">
+                    <label>
+                      <input type="radio" name="optionsRadios" id="radio_is_manager" value="true">
+                      是管理员
+                    </label>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button id="btn_modal_add_user" type="button" class="btn btn-primary">添加</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <div id="modal_modify_spider_args" class="modal fade modal-xs" tabindex="-1" role="dialog"
+         aria-labelledby="mySmallModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span
+                            class="sr-only">Close</span></button>
+                    <h4 class="modal-title">修改爬取参数</h4>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row">
+                    <div class="col-lg-3 col-xs-3">
+                    <label>爬取时间间隔(秒)</label>
+                    </div>
+                    <div class="col-lg-6 col-xs-6">
+                    <input id="input_spider_interval" type="number" class="form-control numbers-box">
+                    </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                    <div class="col-lg-3 col-xs-3">
+                    <label>切换账号间隔(次)</label>
+                    </div>
+                    <div class="col-lg-6 col-xs-6">
+                    <input id="input_switch_account_interval" type="number" class="form-control numbers-box">
+                    </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button id="btn_modify" type="button" class="btn btn-primary">修改</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+</section>
+{% endblock %}
+
+{% block jscontent %}
+<!-- DataTables -->
+<script src="{{ url_for('static',filename='plugins/datatables/jquery.dataTables.min.js') }}"></script>
+<script src="{{ url_for('static',filename='plugins/datatables/dataTables.bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static',filename='plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js') }}"></script>
+<script>
+    $(function () {
+        $("#btn_add_user").click(function () {
+           $("#modal_add_user").modal("toggle");
+        });
+        $("#btn_modify").click(function () {
+           $.ajax({
+                url: 'http://47.93.191.41:5000/spider/api/v1/tasks/' + $("#btn_modify").attr('task_id'),
+                type: 'PUT',
+                data: {
+                    spider_interval: $("#input_spider_interval").val(),
+                    switch_account_interval: $("#input_switch_account_interval").val()
+                },
+                success: function (result) {
+                    $("#modal_modify_spider_args").modal("hide");
+                    $("#users_table").DataTable().ajax.reload();
+                },
+                error:function (result) {
+                    $("#modal_modify_spider_args").modal("hide");
+                    alert(result.responseJSON.error)
+                }
+            });
+        });
+        $("#btn_modal_add_user").click(function () {
+            $.ajax({
+                url: 'http://47.93.191.41:5000/spider/api/v1/users',
+                type: 'POST',
+                data: {
+                    account: $("#input_account").val(),
+                    password: $("#input_password").val(),
+                    phone: $("#input_phone").val(),
+                    email: $("#input_email").val(),
+                    device_code: $("#input_device_code").val(),
+                    is_manager: $('input:radio[name="optionsRadios"]:checked').val()
+                },
+                success: function (result) {
+                    $("#modal_add_user").modal("hide");
+                    $('#input_account').val("");
+                    $('#input_password').val("");
+                    $('#input_phone').val("");
+                    $('#input_email').val("");
+                    $('#input_device_code').val("");
+                    $("#users_table").DataTable().ajax.reload();
+                },
+                error:function (result) {
+                    $("#modal_add_user").modal("hide");
+                    $('#input_account').val("");
+                    $('#input_password').val("");
+                    $('#input_phone').val("");
+                    $('#input_email').val("");
+                    $('#input_device_code').val("");
+                    alert(result.responseJSON.error)
+                }
+            });
+        });
+    });
+    $(document).ready(function () {
+        $('#users_table').DataTable({
+            "processing": true,
+            "serverSide": false,
+            "paging": false,
+            "lengthChange": false,
+            "searching": false,
+            "ordering": false,
+            "info":false,
+            "ajax": {
+                "url": "http://47.93.191.41:5000/spider/api/v1/users",
+                "type": "get",
+            },
+            "columns": [
+                {
+                    data: function (e) {
+                        return "<label name='%s1'>%s2</label>".replace("%s1", e.user_id).replace("%s2", e.account);
+                    }
+                },
+                {"data": "phone"},
+                {"data": "email"},
+                {
+                    data: function (e) {
+                        if (e.create_at) {
+                            return date2str(new Date(Number(e.create_at)), "yyyy-MM-dd hh:mm:ss");
+                        }
+                        return "空";
+                    }
+                },
+                {"data": "device_code"},
+                {"data": "is_manager"},
+                {
+                    data: function (e) {
+                        $('#input_spider_interval').val(e.task.spider_interval);
+                        $('#input_switch_account_interval').val(e.task.switch_account_interval);
+                        return "<a class='btn btn-default btn-xs btn_modify_spider_args' name='%s1'><i class='icon-edit'></i>爬取参数</a>".replace("%s1",e.task_id);
+                    }
+                }
+            ]
+
+        });
+    });
+    $(document).on("click", ".btn_modify_spider_args", function () {
+        $("#btn_modify").attr('task_id',$(this).parents('tr').children('td').children('a').attr('name'))
+        $("#modal_modify_spider_args").modal("toggle");
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block csscontent %}
+<link rel="stylesheet"
+      href="{{ url_for('static',filename='plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css') }}">
+
+{% endblock %}
+
+{% block menu %}
+{% include "menu.html" %}
+<!-- Your Page Content Here -->
+{% endblock %}
+
+{% block content %}
+<section class="content">
+
+    <div class="box box-info">
+        <div class="box-header with-border">
+            <h3 class="box-title">excel列表</h3>
+        </div>
+        <!-- form start -->
+        <div class="box-body">
+            <table id="excel_table" class="table table-bordered table-hover dataTable text-center" role="grid"
+                   aria-describedby="example2_info" cellspacing="0" width="100%">
+                <thead>
+                <tr>
+                    <th>名称</th>
+                    <th>大小</th>
+                    <th>创建时间</th>
+                    <th>查看</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                 {% for excel in excel_list %}
+                <tr>
+                    <td>{{ excel['name'] }}</td>
+                    <td>{{ excel['size'] }}</td>
+                    <td>{{ excel['create_time'] | format_datetime_with_time }}</td>
+                    <td><a class="btn btn-info btn-xs btn_view_excel"><i class="icon-edit"></i>查看</a>
+                    <td><a class="btn btn-danger btn-xs btn_delete_excel"><i class="icon-edit"></i>删除</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+
+</section>
+{% endblock %}
+
+{% block jscontent %}
+<!-- DataTables -->
+<script src="{{ url_for('static',filename='plugins/datatables/jquery.dataTables.min.js') }}"></script>
+<script src="{{ url_for('static',filename='plugins/datatables/dataTables.bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static',filename='plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js') }}"></script>
+<script>
+    var table_excel = $('#excel_table').DataTable({
+        "serverSide": false,
+        "paging": false,
+        "lengthChange": false,
+        "searching": false,
+        "ordering": false,
+        "info":false
+    });
+    $(document).on("click", ".btn_view_excel", function () {
+        $.ajax({
+            url: 'http://127.0.0.1:8000/view/excel',
+            type: 'POST',
+            data: {
+                excel_name: $(this).parents('tr').children('td')[0].innerHTML
+            },
+            success: function (result) {
+            },
+            error: function (result) {
+                alert(result.responseJSON.error)
+            }
+        });
+    });
+    $(document).on("click", ".btn_delete_excel", function () {
+        var row = $(this).parents('tr');
+        $.ajax({
+            url: 'http://127.0.0.1:8000/delete/excel',
+            type: 'POST',
+            data: {
+                excel_name: $(this).parents('tr').children('td')[0].innerHTML
+            },
+            success: function (result) {
+            },
+            error: function (result) {
+                alert(result.responseJSON.error)
+            }
+        });
+        table_excel.row(row).remove().draw()
+    });
+</script>
+{% endblock %}

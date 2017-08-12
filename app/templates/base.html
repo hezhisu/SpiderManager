@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>微博云控</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <!-- Bootstrap 3.3.5 -->
+    <link rel="stylesheet" href="{{ url_for('static',filename='bootstrap/css/bootstrap.min.css') }}">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{{ url_for('static',filename='fonts/font-awesome.min.css') }}">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="{{ url_for('static',filename='ionicons/ionicons.min.css') }}">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/AdminLTE.min.css') }}">
+
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/skins/skin-yellow.min.css') }}">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    {#
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    #}
+    {#
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    #}
+
+    {% block csscontent %}
+    <!-- CSS includes Here -->
+
+    {% endblock %}
+</head>
+<!--
+BODY TAG OPTIONS:
+=================
+Apply one or more of the following classes to get the
+desired effect
+|---------------------------------------------------------|
+| SKINS         | skin-blue                               |
+|               | skin-black                              |
+|               | skin-purple                             |
+|               | skin-yellow                             |
+|               | skin-red                                |
+|               | skin-green                              |
+|---------------------------------------------------------|
+|LAYOUT OPTIONS | fixed                                   |
+|               | layout-boxed                            |
+|               | layout-top-nav                          |
+|               | sidebar-collapse                        |
+|               | sidebar-mini                            |
+|---------------------------------------------------------|
+-->
+<body class="hold-transition skin-yellow sidebar-mini">
+<div class="wrapper">
+
+    {% include "header.html" %}
+
+    {% include "menu.html" %}
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        {% block content %}
+        <!-- Your Page Content Here -->
+        {% endblock %}
+    </div><!-- /.content-wrapper -->
+</div><!-- ./wrapper -->
+
+<!-- REQUIRED JS SCRIPTS -->
+
+<!-- jQuery 2.1.4 -->
+<script src="{{ url_for('static',filename='plugins/jQuery/jQuery-2.1.4.min.js') }}"></script>
+<!-- Bootstrap 3.3.5 -->
+<script src="{{ url_for('static',filename='bootstrap/js/bootstrap.min.js') }}"></script>
+<!-- AdminLTE App -->
+<script src="{{ url_for('static',filename='js/app.min.js') }}"></script>
+<script src="{{ url_for('static',filename='js/date2str.js') }}"></script>
+<script>
+    var popNotice = function () {
+        if (Notification.permission == "granted") {
+            var notification = new Notification("Hi，亲：", {
+                body: '爬取到新内容啦',
+                icon: 'http://127.0.0.1:8000/img/user2-160x160.jpg'
+            });
+
+            notification.onclick = function () {
+                notification.close();
+            };
+
+        }
+    };
+
+    function hasNewFile() {
+        $.ajax({
+            url: 'http://127.0.0.1:8000/file/watcher',
+            type: 'GET',
+            success: function (result) {
+                if(JSON.parse(JSON.stringify(result)).code){
+                    if (Notification.permission == "granted") {
+                        popNotice();
+                    } else if (Notification.permission != "denied") {
+                        Notification.requestPermission(function (permission) {
+                            popNotice();
+                        });
+                    }
+                }
+            },
+            error: function (result) {
+
+            }
+        });
+    }
+    function Polling() {
+        setInterval("hasNewFile()", 5000);
+    }
+    $(window).on('load', function () {
+        if (window.Notification) {
+            Notification.requestPermission(function (permission) {
+            })
+        } else {
+            alert('浏览器不支持Notification');
+        }
+        Polling();
+    });
+</script>
+{% block jscontent %}
+
+{% endblock %}
+</body>
+</html>
