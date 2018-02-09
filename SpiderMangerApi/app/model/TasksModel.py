@@ -12,3 +12,4 @@ class Tasks(Document):
     spider_interval =IntField(required=True)
     switch_account_interval = IntField(required=True)
     belong_user_id = StringField(required=True)
+    private_message = StringField(required=True)

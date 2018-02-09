@@ -1,13 +1,12 @@
 {
     "weibo_accounts" : [
         {
-            "account" : "18855408432",
-            "password" : "a00000000"
+            "account" : "",
+            "password" : ""
         }
     ],
     "spider_user_ids" : [
-        "5538536107",
-        "1723931634"
+        "2352124532"
     ],
     "spider_keywords" : [
     ],

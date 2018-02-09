@@ -26,12 +26,10 @@
                 <thead>
                 <tr>
                     <th>账号</th>
-                    <th>电话</th>
-                    <th>邮箱</th>
                     <th>创建时间</th>
                     <th>机器码</th>
                     <th>管理员</th>
-                    <th>操作</th>
+                    <th>使用截止时间</th>
                 </tr>
                 </thead>
             </table>
@@ -51,15 +49,6 @@
                 </div>
                 <div class="modal-body">
                     <input id="input_password" type="text" class="form-control" autocomplete="off" placeholder="密码">
-                </div>
-                <div class="modal-body">
-                    <input id="input_phone" type="text" class="form-control" autocomplete="off" placeholder="手机">
-                </div>
-                <div class="modal-body">
-                    <input id="input_email" type="text" class="form-control" autocomplete="off" placeholder="邮箱">
-                </div>
-                <div class="modal-body">
-                    <input id="input_device_code" type="text" class="form-control" autocomplete="off" placeholder="机器码">
                 </div>
                 <div class="modal-body">
                   <div class="radio">
@@ -82,6 +71,9 @@
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
+
+
+
     <div id="modal_modify_spider_args" class="modal fade modal-xs" tabindex="-1" role="dialog"
          aria-labelledby="mySmallModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -120,6 +112,42 @@
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
+
+    <div id="modal_modify_use_time" class="modal fade modal-xs" tabindex="-1" role="dialog"
+         aria-labelledby="mySmallModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span
+                            class="sr-only">Close</span></button>
+                    <h4 class="modal-title">修改软件使用时间</h4>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Date:</label>
+
+                        <div class="input-group date" data-date-format="yyyy-mm-dd">
+                          <div class="input-group-addon">
+                            <i class="fa fa-calendar">
+
+                            </i>
+                          </div>
+                          <input type="text" class="form-control pull-right" id="datepicker">
+                        </div>
+                    <!-- /.input group -->
+                  </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button id="btn_save" type="button" class="btn btn-primary">保存</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
 </section>
 {% endblock %}
 
@@ -127,40 +155,38 @@
 <!-- DataTables -->
 <script src="{{ url_for('static',filename='plugins/datatables/jquery.dataTables.min.js') }}"></script>
 <script src="{{ url_for('static',filename='plugins/datatables/dataTables.bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static',filename='plugins/datepicker/bootstrap-datepicker.js') }}"></script>
 <script src="{{ url_for('static',filename='plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js') }}"></script>
 <script>
     $(function () {
         $("#btn_add_user").click(function () {
            $("#modal_add_user").modal("toggle");
         });
-        $("#btn_modify").click(function () {
+        $("#btn_save").click(function () {
            $.ajax({
-                url: 'http://47.93.191.41:5000/spider/api/v1/tasks/' + $("#btn_modify").attr('task_id'),
+                url: 'http://59.110.160.234:5000/spider/api/v1/users',
                 type: 'PUT',
                 data: {
-                    spider_interval: $("#input_spider_interval").val(),
-                    switch_account_interval: $("#input_switch_account_interval").val()
+                    user_id: $("#btn_save").attr('user_id'),
+                    use_time: $("#datepicker").val()
                 },
                 success: function (result) {
-                    $("#modal_modify_spider_args").modal("hide");
+                    $("#modal_modify_use_time").modal("hide");
                     $("#users_table").DataTable().ajax.reload();
                 },
                 error:function (result) {
-                    $("#modal_modify_spider_args").modal("hide");
+                    $("#modal_modify_use_time").modal("hide");
                     alert(result.responseJSON.error)
                 }
             });
         });
         $("#btn_modal_add_user").click(function () {
             $.ajax({
-                url: 'http://47.93.191.41:5000/spider/api/v1/users',
+                url: 'http://59.110.160.234:5000/spider/api/v1/users',
                 type: 'POST',
                 data: {
                     account: $("#input_account").val(),
                     password: $("#input_password").val(),
-                    phone: $("#input_phone").val(),
-                    email: $("#input_email").val(),
-                    device_code: $("#input_device_code").val(),
                     is_manager: $('input:radio[name="optionsRadios"]:checked').val()
                 },
                 success: function (result) {
@@ -194,7 +220,7 @@
             "ordering": false,
             "info":false,
             "ajax": {
-                "url": "http://47.93.191.41:5000/spider/api/v1/users",
+                "url": "http://59.110.160.234:5000/spider/api/v1/users",
                 "type": "get",
             },
             "columns": [
@@ -203,8 +229,6 @@
                         return "<label name='%s1'>%s2</label>".replace("%s1", e.user_id).replace("%s2", e.account);
                     }
                 },
-                {"data": "phone"},
-                {"data": "email"},
                 {
                     data: function (e) {
                         if (e.create_at) {
@@ -219,16 +243,21 @@
                     data: function (e) {
                         $('#input_spider_interval').val(e.task.spider_interval);
                         $('#input_switch_account_interval').val(e.task.switch_account_interval);
-                        return "<a class='btn btn-default btn-xs btn_modify_spider_args' name='%s1'><i class='icon-edit'></i>爬取参数</a>".replace("%s1",e.task_id);
+                        return e.use_time + "   <a class='btn btn-default btn-xs btn_modify_use_time' name='%s1'><i name='%s2' class='icon-edit'>修改</i></a>".replace("%s1",e.user_id).replace("%s2",e.use_time);
                     }
                 }
             ]
 
         });
     });
-    $(document).on("click", ".btn_modify_spider_args", function () {
-        $("#btn_modify").attr('task_id',$(this).parents('tr').children('td').children('a').attr('name'))
-        $("#modal_modify_spider_args").modal("toggle");
+    $(document).on("click", ".btn_modify_use_time", function () {
+        $("#btn_save").attr('user_id',$(this).parents('tr').children('td').children('a').attr('name'))
+        $("#modal_modify_use_time").modal("toggle");
+
+        $('#datepicker').val($(this).parents('tr').children('td').children('a').children('i').attr('name'));
+    });
+    $('#datepicker').datepicker({
+        startDate: '-3d'
     });
 </script>
 {% endblock %}

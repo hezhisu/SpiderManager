@@ -12,9 +12,17 @@
 
 {% block content %}
 <section class="content">
+    <label></label>
+    <div class="row">
+        <div class="col-lg-4 col-xs-6"></div>
+        <div class="col-lg-4 col-xs-6">
+            <button type="button" class="btn btn-block btn-primary btn-lg" id="btn_start_task">开启任务</button>
+        </div>
+        <div class="col-lg-4 col-xs-6"></div>
+    </div>
     <div class="box box-info">
         <div class="box-header with-border">
-            <h3 class="box-title">微博账号</h3>
+            <h3 class="box-title">微博小号</h3>
             <div class="pull-right box-tools">
                 <button id="btn_add_weibo_account" class="btn btn-info btn-sm" data-toggle="tooltip">添加</button>
             </div>
@@ -41,12 +49,12 @@
             </table>
         </div>
     </div>
-    <label></label>
+
     <div class="row">
         <div class="col-lg-3 col-xs-6">
             <div class="box box-info">
                 <div class="box-header with-border">
-                    <h3 class="box-title">爬取微博用户列表</h3>
+                    <h3 class="box-title">监控的同行微博</h3>
                     <div class="pull-right box-tools">
                         <button id="btn_add_spider_user" class="btn btn-info btn-sm" data-toggle="tooltip">添加
                         </button>
@@ -74,36 +82,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-xs-6">
-            <div class="box box-info">
-                <div class="box-header with-border">
-                    <h3 class="box-title">邮箱列表</h3>
-                    <div class="pull-right box-tools">
-                        <button id="btn_add_mail" class="btn btn-info btn-sm" data-toggle="tooltip">添加</button>
-                    </div>
-                </div>
-                <!-- form start -->
-                <div class="box-body">
-                    <table id="table_mail_list" class="table table-bordered table-hover dataTable text-center"
-                           role="grid"
-                           aria-describedby="example2_info" cellspacing="0" width="100%">
-                        <thead>
-                        <tr>
-                            <th>邮箱</th>
-                            <th>操作</th>
-                        </tr>
-                        </thead>
-                        {% for mail in task.mail_list %}
-                        <tr>
-                            <td>{{ mail }}</td>
-                            <td><a class="btn btn-danger btn-xs btn_delete_mail"><i class="icon-edit"></i>删除</a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </table>
-                </div>
-            </div>
-        </div>
+
         <div class="col-lg-3 col-xs-6">
             <div class="box box-info">
                 <div class="box-header with-border">
@@ -139,7 +118,8 @@
                 <div class="box-header with-border">
                     <h3 class="box-title">否定关键字列表</h3>
                     <div class="pull-right box-tools">
-                        <button id="btn_add_extra_keywords" class="btn btn-info btn-sm" data-toggle="tooltip">添加</button>
+                        <button id="btn_add_extra_keywords" class="btn btn-info btn-sm" data-toggle="tooltip">添加
+                        </button>
                     </div>
                 </div>
                 <!-- form start -->
@@ -156,7 +136,38 @@
                         {% for keyword in task.spider_extra_keywords %}
                         <tr>
                             <td>{{ keyword }}</td>
-                            <td><a class="btn btn-danger btn-xs btn_delete_extra_keywords"><i class="icon-edit"></i>删除</a>
+                            <td><a class="btn btn-danger btn-xs btn_delete_extra_keywords"><i
+                                    class="icon-edit"></i>删除</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-xs-6">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">收取客资的邮箱</h3>
+                    <div class="pull-right box-tools">
+                        <button id="btn_add_mail" class="btn btn-info btn-sm" data-toggle="tooltip">添加</button>
+                    </div>
+                </div>
+                <!-- form start -->
+                <div class="box-body">
+                    <table id="table_mail_list" class="table table-bordered table-hover dataTable text-center"
+                           role="grid"
+                           aria-describedby="example2_info" cellspacing="0" width="100%">
+                        <thead>
+                        <tr>
+                            <th>邮箱</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        {% for mail in task.mail_list %}
+                        <tr>
+                            <td>{{ mail }}</td>
+                            <td><a class="btn btn-danger btn-xs btn_delete_mail"><i class="icon-edit"></i>删除</a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -166,109 +177,151 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-lg-4 col-xs-6"></div>
-        <div class="col-lg-4 col-xs-6">
-            <button type="button" class="btn btn-block btn-primary btn-lg" id="btn_start_task">开启任务</button>
+        <div class="col-lg-3 col-xs-6">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">私信内容</h3>
+                    <div class="pull-right box-tools">
+                        <button id="btn_set_private_message" class="btn btn-info btn-sm" data-toggle="tooltip">设置
+                        </button>
+                    </div>
+                    <div class="box-body">
+                        <label id="lb_private_message">{{ task.private_message }}</label>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="col-lg-4 col-xs-6"></div>
+        <div class="row">
+            <div id="modal_add_weibo_account" class="modal fade modal-xs" tabindex="-1" role="dialog"
+                 aria-labelledby="mySmallModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span
+                                    aria-hidden="true">×</span><span
+                                    class="sr-only">Close</span></button>
+                            <h4 class="modal-title">添加微博账号</h4>
+                        </div>
+                        <div class="modal-body">
+                            <input id="input_account" type="text" class="form-control" autocomplete="off"
+                                   placeholder="账号">
+                            <br>
+                            <input id="input_password" type="text" class="form-control" autocomplete="off"
+                                   placeholder="密码">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                            <button id="btn_modal_add_weibo_account" type="button" class="btn btn-primary">添加</button>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+            </div><!-- /.modal -->
+            <div id="modal_add_spider_user" class="modal fade modal-xs" tabindex="-1" role="dialog"
+                 aria-labelledby="mySmallModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span
+                                    aria-hidden="true">×</span><span
+                                    class="sr-only">Close</span></button>
+                            <h4 class="modal-title">添加爬取用户</h4>
+                        </div>
+                        <div class="modal-body">
+                            <input id="input_spider_user_id" type="text" class="form-control" autocomplete="off"
+                                   placeholder="用户ID">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                            <button id="btn_modal_add_spider_user" type="button" class="btn btn-primary">添加</button>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+            </div><!-- /.modal -->
+            <div id="modal_add_mail" class="modal fade modal-xs" tabindex="-1" role="dialog"
+                 aria-labelledby="mySmallModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span
+                                    aria-hidden="true">×</span><span
+                                    class="sr-only">Close</span></button>
+                            <h4 class="modal-title">添加邮箱</h4>
+                        </div>
+                        <div class="modal-body">
+                            <input id="input_mail" type="text" class="form-control" autocomplete="off" placeholder="邮箱">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                            <button id="btn_modal_add_mail" type="button" class="btn btn-primary">添加</button>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+            </div><!-- /.modal -->
+            <div id="modal_add_keywords" class="modal fade modal-xs" tabindex="-1" role="dialog"
+                 aria-labelledby="mySmallModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span
+                                    aria-hidden="true">×</span><span
+                                    class="sr-only">Close</span></button>
+                            <h4 class="modal-title">添加关键字</h4>
+                        </div>
+                        <div class="modal-body">
+                            <input id="input_keywords" type="text" class="form-control" autocomplete="off"
+                                   placeholder="关键字">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                            <button id="btn_modal_add_keywords" type="button" class="btn btn-primary">添加</button>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+            </div><!-- /.modal -->
+            <div id="modal_add_extra_keywords" class="modal fade modal-xs" tabindex="-1" role="dialog"
+                 aria-labelledby="mySmallModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span
+                                    aria-hidden="true">×</span><span
+                                    class="sr-only">Close</span></button>
+                            <h4 class="modal-title">添加否定关键字</h4>
+                        </div>
+                        <div class="modal-body">
+                            <input id="input_extra_keywords" type="text" class="form-control" autocomplete="off"
+                                   placeholder="否定关键字">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                            <button id="btn_modal_add_extra_keywords" type="button" class="btn btn-primary">添加</button>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+            </div><!-- /.modal -->
+            <div id="modal_set_private_message" class="modal fade modal-xs" tabindex="-1" role="dialog"
+                 aria-labelledby="mySmallModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span
+                                    aria-hidden="true">×</span><span
+                                    class="sr-only">Close</span></button>
+                            <h4 class="modal-title">设置私信发送内容</h4>
+                        </div>
+                        <div class="modal-body">
+                            <input id="input_private_message" type="text" class="form-control" autocomplete="off"
+                                   placeholder="私信内容">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                            <button id="btn_modal_set_private_message" type="button" class="btn btn-primary">设置</button>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+            </div><!-- /.modal -->
+        </div>
     </div>
-    <div id="modal_add_weibo_account" class="modal fade modal-xs" tabindex="-1" role="dialog"
-         aria-labelledby="mySmallModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span
-                            class="sr-only">Close</span></button>
-                    <h4 class="modal-title">添加微博账号</h4>
-                </div>
-                <div class="modal-body">
-                    <input id="input_account" type="text" class="form-control" autocomplete="off" placeholder="账号">
-                    <br>
-                    <input id="input_password" type="text" class="form-control" autocomplete="off" placeholder="密码">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                    <button id="btn_modal_add_weibo_account" type="button" class="btn btn-primary">添加</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-    <div id="modal_add_spider_user" class="modal fade modal-xs" tabindex="-1" role="dialog"
-         aria-labelledby="mySmallModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span
-                            class="sr-only">Close</span></button>
-                    <h4 class="modal-title">添加爬取用户</h4>
-                </div>
-                <div class="modal-body">
-                    <input id="input_spider_user_id" type="text" class="form-control" autocomplete="off" placeholder="用户ID">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                    <button id="btn_modal_add_spider_user" type="button" class="btn btn-primary">添加</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-    <div id="modal_add_mail" class="modal fade modal-xs" tabindex="-1" role="dialog"
-         aria-labelledby="mySmallModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span
-                            class="sr-only">Close</span></button>
-                    <h4 class="modal-title">添加邮箱</h4>
-                </div>
-                <div class="modal-body">
-                    <input id="input_mail" type="text" class="form-control" autocomplete="off" placeholder="邮箱">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                    <button id="btn_modal_add_mail" type="button" class="btn btn-primary">添加</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-    <div id="modal_add_keywords" class="modal fade modal-xs" tabindex="-1" role="dialog"
-         aria-labelledby="mySmallModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span
-                            class="sr-only">Close</span></button>
-                    <h4 class="modal-title">添加关键字</h4>
-                </div>
-                <div class="modal-body">
-                    <input id="input_keywords" type="text" class="form-control" autocomplete="off" placeholder="关键字">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                    <button id="btn_modal_add_keywords" type="button" class="btn btn-primary">添加</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-    <div id="modal_add_extra_keywords" class="modal fade modal-xs" tabindex="-1" role="dialog"
-         aria-labelledby="mySmallModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span
-                            class="sr-only">Close</span></button>
-                    <h4 class="modal-title">添加否定关键字</h4>
-                </div>
-                <div class="modal-body">
-                    <input id="input_extra_keywords" type="text" class="form-control" autocomplete="off" placeholder="否定关键字">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                    <button id="btn_modal_add_extra_keywords" type="button" class="btn btn-primary">添加</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
 </section>
 {% endblock %}
 
@@ -284,7 +337,7 @@
         "lengthChange": false,
         "searching": false,
         "ordering": false,
-        "info":false
+        "info": false
     });
     var table_spider_user = $('#table_spider_user_ids').DataTable({
         "serverSide": false,
@@ -292,7 +345,7 @@
         "lengthChange": false,
         "searching": false,
         "ordering": false,
-        "info":false
+        "info": false
     });
     var table_mail = $('#table_mail_list').DataTable({
         "serverSide": false,
@@ -300,7 +353,7 @@
         "lengthChange": false,
         "searching": false,
         "ordering": false,
-        "info":false
+        "info": false
     });
     var table_keywords = $('#table_keywords').DataTable({
         "serverSide": false,
@@ -308,7 +361,7 @@
         "lengthChange": false,
         "searching": false,
         "ordering": false,
-        "info":false
+        "info": false
     });
     var table_extra_keywords = $('#table_extra_keywords').DataTable({
         "serverSide": false,
@@ -316,12 +369,12 @@
         "lengthChange": false,
         "searching": false,
         "ordering": false,
-        "info":false
+        "info": false
     });
     $(function () {
         $("#btn_start_task").click(function () {
             $.ajax({
-                url: 'http://47.93.191.41:5000/spider/api/v1/tasks',
+                url: 'http://59.110.160.234:5000/spider/api/v1/tasks',
                 type: 'GET',
                 data: {
                     user_id: '{{manager['_id']['$oid']}}'
@@ -343,7 +396,7 @@
                     });
 
                 },
-                error:function (result) {
+                error: function (result) {
                     alert(result.responseJSON.error)
                 }
             });
@@ -354,7 +407,7 @@
         });
         $("#btn_modal_add_weibo_account").click(function () {
             $.ajax({
-                url: 'http://47.93.191.41:5000/spider/api/v1/tasks/' + '{{ task.id }}/weibo_accounts',
+                url: 'http://59.110.160.234:5000/spider/api/v1/tasks/' + '{{ task['_id']['$oid'] }}/weibo_accounts',
                 type: 'POST',
                 data: {
                     account: $("#input_account").val(),
@@ -373,11 +426,11 @@
             });
         });
         $("#btn_add_spider_user").click(function () {
-                $("#modal_add_spider_user").modal("toggle");
+            $("#modal_add_spider_user").modal("toggle");
         });
         $("#btn_modal_add_spider_user").click(function () {
             $.ajax({
-                url: 'http://47.93.191.41:5000/spider/api/v1/tasks/' + '{{ task.id }}/spider_users',
+                url: 'http://59.110.160.234:5000/spider/api/v1/tasks/' + '{{ task['_id']['$oid'] }}/spider_users',
                 type: 'POST',
                 data: {
                     user_id: $("#input_spider_user_id").val()
@@ -397,9 +450,13 @@
         $("#btn_add_mail").click(function () {
             $("#modal_add_mail").modal("toggle");
         });
+        $("#btn_set_private_message").click(function () {
+            $("#modal_set_private_message").modal("toggle");
+        });
+
         $("#btn_modal_add_mail").click(function () {
             $.ajax({
-                url: 'http://47.93.191.41:5000/spider/api/v1/tasks/' + '{{ task.id }}/mails',
+                url: 'http://59.110.160.234:5000/spider/api/v1/tasks/' + '{{ task['_id']['$oid'] }}/mails',
                 type: 'POST',
                 data: {
                     mail: $("#input_mail").val()
@@ -415,12 +472,28 @@
             });
         });
 
+        $("#btn_modal_set_private_message").click(function () {
+            $.ajax({
+                url: 'http://59.110.160.234:5000/spider/api/v1/tasks/' + '{{ task['_id']['$oid'] }}/private_message',
+                type: 'PUT',
+                data: {
+                    private_message: $("#input_private_message").val()
+                },
+                success: function (result) {
+                    $("#modal_set_private_message").modal("hide");
+                    $("#lb_private_message").html($("#input_private_message").val())
+                    $('#input_private_message').val("");
+
+                }
+            });
+        });
+
         $("#btn_add_keyword").click(function () {
             $("#modal_add_keywords").modal("toggle");
         });
         $("#btn_modal_add_keywords").click(function () {
             $.ajax({
-                url: 'http://47.93.191.41:5000/spider/api/v1/tasks/' + '{{ task.id }}/spider_keywords',
+                url: 'http://59.110.160.234:5000/spider/api/v1/tasks/' + '{{ task['_id']['$oid'] }}/spider_keywords',
                 type: 'POST',
                 data: {
                     keyword: $("#input_keywords").val()
@@ -441,7 +514,7 @@
         });
         $("#btn_modal_add_extra_keywords").click(function () {
             $.ajax({
-                url: 'http://47.93.191.41:5000/spider/api/v1/tasks/' + '{{ task.id }}/spider_extra_keywords',
+                url: 'http://59.110.160.234:5000/spider/api/v1/tasks/' + '{{ task['_id']['$oid'] }}/spider_extra_keywords',
                 type: 'POST',
                 data: {
                     extra_keyword: $("#input_extra_keywords").val()
@@ -461,7 +534,7 @@
     $(document).on("click", ".btn_delete_account", function () {//取出当前行的数据
         var row = $(this).parents('tr');
         $.ajax({
-            url: 'http://47.93.191.41:5000/spider/api/v1/tasks/' + '{{ task.id }}/weibo_accounts',
+            url: 'http://59.110.160.234:5000/spider/api/v1/tasks/' + '{{ task['_id']['$oid'] }}/weibo_accounts',
             type: 'DELETE',
             data: {
                 account: row.children('td')[0].innerHTML
@@ -474,7 +547,7 @@
     $(document).on("click", ".btn_delete_spider_user", function () {//取出当前行的数据
         var row = $(this).parents('tr');
         $.ajax({
-            url: 'http://47.93.191.41:5000/spider/api/v1/tasks/' + '{{ task.id }}/spider_users',
+            url: 'http://59.110.160.234:5000/spider/api/v1/tasks/' + '{{ task['_id']['$oid'] }}/spider_users',
             type: 'DELETE',
             data: {
                 user_id: row.children('td')[0].innerHTML
@@ -487,7 +560,7 @@
     $(document).on("click", ".btn_delete_mail", function () {//取出当前行的数据
         var row = $(this).parents('tr');
         $.ajax({
-            url: 'http://47.93.191.41:5000/spider/api/v1/tasks/' + '{{ task.id }}/mails',
+            url: 'http://59.110.160.234:5000/spider/api/v1/tasks/' + '{{ task['_id']['$oid'] }}/mails',
             type: 'DELETE',
             data: {
                 mail: row.children('td')[0].innerHTML
@@ -500,7 +573,7 @@
     $(document).on("click", ".btn_delete_keywords", function () {//取出当前行的数据
         var row = $(this).parents('tr');
         $.ajax({
-            url: 'http://47.93.191.41:5000/spider/api/v1/tasks/' + '{{ task.id }}/spider_keywords',
+            url: 'http://59.110.160.234:5000/spider/api/v1/tasks/' + '{{ task['_id']['$oid'] }}/spider_keywords',
             type: 'DELETE',
             data: {
                 keyword: row.children('td')[0].innerHTML
@@ -513,7 +586,7 @@
     $(document).on("click", ".btn_delete_extra_keywords", function () {//取出当前行的数据
         var row = $(this).parents('tr');
         $.ajax({
-            url: 'http://47.93.191.41:5000/spider/api/v1/tasks/' + '{{ task.id }}/spider_extra_keywords',
+            url: 'http://59.110.160.234:5000/spider/api/v1/tasks/' + '{{ task['_id']['$oid'] }}/spider_extra_keywords',
             type: 'DELETE',
             data: {
                 extra_keyword: row.children('td')[0].innerHTML

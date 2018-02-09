@@ -59,6 +59,18 @@
 		  {% else %}
 			<li ><a href='/manage/excel'>查看excel</a></li>
 		  {% endif %}
+
+		  {% if select_menu == 'crawl_fans' %}
+			<li ><a href='/crawl/fans'><font color="#ffffff">粉丝</font></a></li>
+		  {% else %}
+			<li ><a href='/crawl/fans'>粉丝</a></li>
+		  {% endif %}
+
+		  {% if select_menu == 'crawl_comments' %}
+			<li ><a href='/crawl/comments'><font color="#ffffff">评论</font></a></li>
+		  {% else %}
+			<li ><a href='/crawl/comments'>评论</a></li>
+		  {% endif %}
 		</ul>
 	</ul><!-- /.sidebar-menu -->
   </section>

@@ -14,26 +14,35 @@ delete_weibo_user_account_parser = api.parser()
 delete_weibo_user_account_parser.add_argument('account',required=True,type=str,help='账号',location='form')
 get_task_parser = api.parser()
 get_task_parser.add_argument('user_id',required=True,type=str,help='账号',location='args')
+get_task_parser.add_argument('ignore_verify',required=False,type=int,help='是否忽略验证',location='args')
 update_task_parser = api.parser()
 update_task_parser.add_argument('spider_interval',required=True,type=str,help='爬取时间间隔',location='form')
 update_task_parser.add_argument('switch_account_interval',required=True,type=str,help='切换账号时间间隔',location='form')
+
+task_args = {'code':'状态码','cache':'缓存','account':'账号'}
+
+def get_custom_api_doc(notice,code):
+    return '{0}<br><br><pre>`{1}`</pre>'.format(notice,json.dumps(code, indent=4, ensure_ascii=False))
 @api.route('')
 class TasksResource(Resource):
     @api.expect(get_task_parser)
-    @api.doc('获取任务')
+    @api.doc(description=get_custom_api_doc('字段说明',task_args))
     def get(self):
         '''
         获取任务
         '''
         args = get_task_parser.parse_args()
         task = Tasks.objects(belong_user_id=args['user_id']).first()
-        if len(task.mail_list) == 0:
-            return {'error':'至少填写一个邮箱'},400
-        if len(task.spider_user_ids) == 0:
-            return {'error':'至少填写一个爬取的微博用户id'},400
-        if len(task.weibo_accounts) == 0:
-            return {'error':'至少填写一个微博账号用于登录'},400
-        return json.loads(task.to_json())
+        if args['ignore_verify'] and args['ignore_verify'] == 1:
+            return json.loads(task.to_json())
+        else:
+            if len(task.mail_list) == 0:
+                return {'error':'至少填写一个邮箱'},400
+            if len(task.spider_user_ids) == 0:
+                return {'error':'至少填写一个爬取的微博用户id'},400
+            if len(task.weibo_accounts) == 0:
+                return {'error':'至少填写一个微博账号用于登录'},400
+            return json.loads(task.to_json())
 @api.route('/<string:task_id>')
 class TaskResource(Resource):
     @api.expect(update_task_parser)
@@ -193,4 +202,18 @@ class KeywordsResource(Resource):
             return {'error': '任务不存在'}, 400
 
 
+
+set_private_message_parser = api.parser()
+set_private_message_parser.add_argument('private_message',required=True,type=str,help='邮箱',location='form')
+@api.route('/<string:task_id>/private_message')
+class PrivateMessageResource(Resource):
+    @api.expect(set_private_message_parser)
+    @api.doc('设置私信')
+    def put(self,task_id):
+        '''
+        设置私信
+        '''
+        args = set_private_message_parser.parse_args()
+        Tasks.objects(id=task_id).update(set__private_message=args['private_message'])
+        return {'msg':'设置成功'}
 

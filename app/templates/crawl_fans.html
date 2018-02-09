@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block csscontent %}
+<link rel="stylesheet"
+      href="{{ url_for('static',filename='plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css') }}">
+
+{% endblock %}
+
+{% block menu %}
+{% include "menu.html" %}
+<!-- Your Page Content Here -->
+{% endblock %}
+
+{% block content %}
+<section class="content">
+
+    <div class="box box-info">
+        <div class="box-header with-border">
+            <h3 class="box-title">粉丝列表</h3>
+        </div>
+        <!-- form start -->
+        <div class="box-body">
+            <table id="fans_table" class="table table-bordered table-hover dataTable text-center" role="grid"
+                   aria-describedby="example2_info" cellspacing="0" width="100%">
+                <thead>
+                <tr>
+                    <th>粉丝ID</th>
+                    <th>粉丝昵称</th>
+                    <th>粉丝性别</th>
+                    <th>同行ID</th>
+                    <th>同行昵称</th>
+                    <th>爬取时间</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+
+</section>
+{% endblock %}
+
+{% block jscontent %}
+<!-- DataTables -->
+<script src="{{ url_for('static',filename='plugins/datatables/jquery.dataTables.min.js') }}"></script>
+<script src="{{ url_for('static',filename='plugins/datatables/dataTables.bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static',filename='plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        $('#fans_table').DataTable({
+            "processing": true,
+            "serverSide": false,
+            "paging": true,
+            "lengthChange": false,
+            "searching": false,
+            "ordering": true,
+            "info":false,
+            "pageLength":10,
+            "ajax": {
+                "url": "http://127.0.0.1:8000/fans",
+                "type": "get",
+            },
+            "columns": [
+                {"data": "fans_id"},
+                {"data": "nickname"},
+                {"data": "gender"},
+                {"data": "host_id"},
+                {"data": "host_nickname"},
+                {
+                    data: function (e) {
+                        if (e.create_at) {//默认是/Date(794851200000)/格式，需要显示成年月日方式
+                            return date2str(new Date(Number(e.create_at)), "yyyy-MM-dd hh:mm:ss");
+                        }
+                        return "空";
+                }
+            }
+            ]
+
+        });
+    });
+</script>
+{% endblock %}

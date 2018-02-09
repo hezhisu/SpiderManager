@@ -11,6 +11,11 @@ from app.main.view.delete_excel import blueprint as delete_excel_blueprint
 from app.main.view.view_excel import blueprint as view_excel_blueprint
 from app.main.view.logout import blueprint as logout_blueprint
 from app.main.view.file_watcher import blueprint as file_watcher_blueprint
+from app.main.view.fans import blueprint as fans_blueprint
+from app.main.view.crawl_fans import blueprint as crawl_fans_blueprint
+
+from app.main.view.comments import blueprint as comments_blueprint
+from app.main.view.crawl_comments import blueprint as crawl_comments_blueprint
 __author__ = 'hezhisu'
 def getcwd():
     return os.getcwd()
@@ -27,6 +32,10 @@ def create_app(config_name):
     app.register_blueprint(view_excel_blueprint)
     app.register_blueprint(logout_blueprint)
     app.register_blueprint(file_watcher_blueprint)
+    app.register_blueprint(fans_blueprint)
+    app.register_blueprint(crawl_fans_blueprint)
+    app.register_blueprint(comments_blueprint)
+    app.register_blueprint(crawl_comments_blueprint)
     app.jinja_env.globals.update(getcwd=getcwd)
 
     # attach routes and custom error pages here

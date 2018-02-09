@@ -3,6 +3,8 @@ import json
 import threading
 
 import sys
+import uuid
+
 import xlrd,xlsxwriter
 import time
 import os
@@ -33,6 +35,9 @@ import requests
 import rsa
 from bs4 import BeautifulSoup
 import redis
+from mongoengine import connect, Document, StringField, IntField
+
+connect('spider_log')
 my_redis = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
 mail_user = 'pa1@21v.net'
 mail_password = 'Aa00000000'
@@ -43,13 +48,11 @@ headers = {
 profile_request_params = {"profile_ftype":"1","is_all":"1"}
 profile_request_params_hot = {"profile_ftype":"1","is_hot":"1"}
 session = requests.session()
-
 # 访问 初始页面带上 cookie
 index_url = "http://weibo.com/login.php"
 yundama_username = '526510100'
 yundama_password = 'a00000000'
 verify_code_path = './pincode.png'
-
 class Config:
     def __init__(self):
         path = sys.path[0] + "/config.json"
@@ -63,6 +66,7 @@ class Config:
             self.mail_list = configJson["mail_list"]
             self.spider_interval = configJson["spider_interval"]
             self.switch_account_interval = configJson["switch_account_interval"]
+            self.private_message = configJson["private_message"]
         except Exception as e:
             print(e.args)
         finally:
@@ -70,6 +74,27 @@ class Config:
 
 
 config = Config()
+
+
+class Comment(Document):
+    host_id = StringField(required=True)
+    host_nickname = StringField(required=True)
+    weibo_content = StringField(required=True)
+    weibo_link = StringField(required=True)
+    comment_user = StringField(required=True)
+    comment_content = StringField(required=True)
+    comment_time = StringField(required=True)
+    create_at = IntField(required=True)
+
+class Fans(Document):
+    host_id = StringField(required=True)
+    host_nickname = StringField(required=True)
+    fans_id = StringField(required=True)
+    nickname = StringField(required=True)
+    gender = StringField(required=True)
+    create_at = IntField(required=True)
+
+
 def filter_tags(htmlstr):
     # 先过滤CDATA
     re_cdata = re.compile('//<!\[CDATA\[[^>]*//\]\]>', re.I)  # 匹配CDATA
@@ -113,18 +138,82 @@ def replaceCharEntity(htmlstr):
     return htmlstr
 
 
-def task(uid, keyword, extra_keyword, interval):
+def task(uid, keyword, extra_keyword, interval,private_message):
     if not os.path.exists(os.getcwd() + '/excel'):
         os.makedirs(os.getcwd() + '/excel')
+    if not os.path.exists(os.getcwd() + '/fansexcel'):
+        os.makedirs(os.getcwd() + '/fansexcel')
     for item in uid:
         time.sleep(interval)
-        spider_task(item, keyword, extra_keyword, True)
+        spider_task(item, keyword, extra_keyword, True,private_message)
         time.sleep(interval)
-        spider_task(item, keyword, extra_keyword, False)
+        spider_task(item, keyword, extra_keyword, False,private_message)
 
 
-def spider_task(uid, keyword, extra_keyword, is_hot):
-    print("do task")
+def spider_fans(uid,nickname,last_fans_id,private_message):
+    if last_fans_id:
+        print('last_fans_id : ' + last_fans_id)
+    else:
+        print('last_fans_id : ')
+    fans_ids = []
+    fans_items = []
+    fans_objects = []
+    for i in range(5):
+        try:
+            url = 'https://m.weibo.cn/api/container/getIndex?containerid=231051_-_fans_-_{0}&type=all&since_id={1}'.format(uid,i + 1)
+            response = requests.get(url)
+            fans = json.loads(response.text)['data']['cards']
+            if len(fans) > 0:
+                for fan in fans[0]['card_group']:
+                    fans_item = OrderedDict({})
+                    fans_object = Fans()
+                    if last_fans_id == str(fan['user']['id']):
+                        print(fans_items)
+                        return fans_items
+                    fans_object.host_id = uid
+                    fans_object.host_nickname = nickname
+                    fans_item['id'] = str(fan['user']['id'])
+                    fans_object.fans_id = fans_item['id']
+                    fans_item['nickname'] = fan['user']['screen_name']
+                    fans_object.nickname = fans_item['nickname']
+                    if fan['user']['gender'] == 'm':
+                        fans_item['gender'] = '男'
+                    else:
+                        fans_item['gender'] = '女'
+                    fans_object.gender = fans_item['gender']
+
+                    fans_item['host_id'] = uid
+                    fans_item['host_nickname'] = nickname
+                    fans_object.create_at = time.time() * 1000
+                    if fan['user']['id'] in fans_ids:
+                        continue
+                    fans_items.append(fans_item)
+                    fans_objects.append(fans_object)
+                    fans_ids.append(fan['user']['id'])
+        except Exception as e:
+            continue
+    print(fans_items)
+
+    for item in fans_objects:
+        if Fans.objects(fans_id = item.fans_id).first() is None:
+            item.save()
+            send_message(private_message,item.fans_id)
+    return fans_items
+
+
+def send_message(text,to):
+    requestUrl = 'https://api.weibo.com/webim/2/direct_messages/new.json?source=209678993'
+    request_params = {}
+
+    request_params["uid"] = to
+    request_params["text"] = text
+    session.headers['Referer'] = 'https://api.weibo.com/chat/'
+    response = session.post(requestUrl,data=request_params)
+    print(response.text)
+
+def spider_task(uid, keyword, extra_keyword, is_hot, private_message):
+    print('do task')
+    comments_ids = []
     try:
         profile_url = 'http://weibo.com/u/{0}?'.format(uid)
         profile_request_params["page"] = 1
@@ -143,6 +232,7 @@ def spider_task(uid, keyword, extra_keyword, is_hot):
         soup_child = BeautifulSoup(str(str(script_list[tag])[html_start:html_end + 4]).replace("\\", "")
                                    .replace("n", "").replace("r", ""), 'html.parser')
         weibo_items = []
+        nickname = soup_child.find('a',class_='W_f14 W_fb S_txt1').string
         for item in soup_child.findAll('a', class_='S_txt2'):
             weibo_item = {}
             s = eval(str(item.attrs)).get('suda-uatack')
@@ -162,32 +252,54 @@ def spider_task(uid, keyword, extra_keyword, is_hot):
                     index = index + 1
                     weibo_items[index]['link'] = 'http://weibo.com/' + uid + '/' + id_char
         print(weibo_items)
+
         weibo_comments = []
+        last_fans_id = my_redis.get('fans_' + uid)
+        fans_items = spider_fans(uid,nickname,last_fans_id,private_message)
+        if len(fans_items) > 0:
+            my_redis.set('fans_' + uid, fans_items[0]['id'])
+            json_list_to_excel(fans_items,
+                               ['粉丝ID', '粉丝昵称', '粉丝性别','同行ID','同行昵称']
+                               , os.getcwd() + '/fansexcel/fans_{0}_{1}_{2}.xlsx'.format(uid, nickname, str(int(time.time()))))
+        comment_objects = []
         for weibo_item in weibo_items:
             this_weibo_last_comment_content = my_redis.get(weibo_item['id'])
-            print(weibo_item['id'])
-            response = requests.get('https://m.weibo.cn/api/comments/show?id={0}'.format(weibo_item['id']))
+            response =requests.get ('https://m.weibo.cn/api/comments/show?id={0}'.format(weibo_item['id']))
             comments = []
             if 'data' in json.loads(response.text):
                 print('has data')
-                comments = json.loads(response.text)['data']
+                comments = json.loads(response.text)['data']['data']
                 print(comments)
             for comment in comments:
                 is_add = False
+                comment_object = Comment()
+                comment_object.host_nickname = nickname
                 weibo_comment = OrderedDict({})
-                weibo_comment['uid'] = uid
+                comment_object.host_id = uid
+                weibo_comment['comment_user'] = str(comment['user']['id'])
+                weibo_comment['comment_user_link'] = 'https://weibo.com/u/' + str(comment['user']['id'])
                 weibo_comment['weibo_content'] = weibo_item['content']
+                comment_object.weibo_content = weibo_comment['weibo_content']
                 weibo_comment['weibo_link'] = weibo_item['link']
-                weibo_comment['comment_user'] = 'http://weibo.com/u/' + str(comment['user']['id'])
+                comment_object.weibo_link = weibo_comment['weibo_link']
+                comment_object.comment_user = str(comment['user']['id'])
                 comment_content = filter_tags(comment['text'])
                 weibo_comment['comment_content'] = comment_content
+                comment_object.comment_content = weibo_comment['comment_content']
                 weibo_comment['comment_time'] = comment['created_at']
+                comment_object.comment_time = weibo_comment['comment_time']
+
+                weibo_comment['host_id'] = uid
+                weibo_comment['host_nickname'] = nickname
+                comment_object.create_at = time.time() * 1000
                 if this_weibo_last_comment_content == str(comment['id']):
                     break
                 print(keyword)
-                if len(keyword) == 0:
+                if len(keyword) == 0 and weibo_comment['comment_user'] not in comments_ids:
                     print("append")
                     weibo_comments.append(weibo_comment)
+                    comment_objects.append(comment_object)
+                    comments_ids.append(weibo_comment['comment_user'])
                     continue
                 is_in_key = False
                 for k in keyword:
@@ -199,23 +311,26 @@ def spider_task(uid, keyword, extra_keyword, is_hot):
                     if comment_content.find(e) > -1:
                         is_in_extra_key = True
                         break
-                if is_in_key and not is_in_extra_key:
+                if is_in_key and not is_in_extra_key and weibo_comment['comment_user'] not in comments_ids:
                     weibo_comments.append(weibo_comment)
+                    comment_objects.append(comment_object)
+                    comments_ids.append(weibo_comment['comment_user'])
             if len(comments) > 0:
                 my_redis.set(weibo_item['id'], str(comments[0]['id']))
         if len(weibo_comments) > 0:
+            Comment.objects.insert(comment_objects)
             json_list_to_excel(weibo_comments,
-                                         ['微博主', '当前微博内容', '当前微博链接', '客户微博链接', '客户回复内容', '咨询回复时间']
-                                         , os.getcwd() + '/excel/comments{0}.xlsx'.format(str(int(time.time()))))
+                               ['评论人ID', '评论人主页', '当前微博内容', '当前微博链接', '客户回复内容', '咨询回复时间','同行ID','同行昵称']
+                               , os.getcwd() + '/excel/comments_{0}_{1}_{2}.xlsx'.format(uid,nickname,str(int(time.time()))))
             send_mail("pa1@21v.net", weibo_comments[0]['comment_content'], weibo_comments[0]['weibo_content'],
-                               [os.getcwd() + '/excel/comments{0}.xlsx'.format(str(int(time.time())))])
+                      [os.getcwd() + '/excel/comments_{0}_{1}_{2}.xlsx'.format(uid,nickname,str(int(time.time())))])
         print(weibo_comments)
     except Exception as e:
-        print(e)
+        print(e.args)
     finally:
         pass
-def perfirm(uid,keyword,extra_keyword,interval):
-    task(uid=uid,keyword=keyword,extra_keyword=extra_keyword,interval=interval)
+def perfirm(uid,keyword,extra_keyword,interval,private_message):
+    task(uid=uid,keyword=keyword,extra_keyword=extra_keyword,interval=interval,private_message=private_message)
 def getAccount(index):
     return config.weibo_accounts[index]
 def json_list_to_excel(json_list,excel_title,out_excel_file):
@@ -492,23 +607,36 @@ def login(username, password):
     uuid = login_index.text
     print('登陆成功' + uuid)
 
+def get_mac_address():
+    mac=uuid.UUID(int = uuid.getnode()).hex[-12:]
+    return ":".join([mac[e:e+2] for e in range(0,11,2)])
 if __name__ == '__main__':
-    index = 0
-    spider_times = 0
-    account = getAccount(0)
-    login(account['account'],account['password'])
-    while True:
-        print('Loop')
-        if spider_times != 0 and spider_times % config.switch_account_interval == 0:
-            index = index + 1
-            if index >= len(config.weibo_accounts):
-                index = 0
-            account = getAccount(index)
-            try:
-                login(account['WeiboLogin'], account['WeiboPassWord'])
-            except Exception as e:
-                print(e.args)
-        t = threading.Thread(target=perfirm,args=(config.spider_user_ids,config.spider_keywords,config.spider_extra_keywords,config.spider_interval))
-        t.start()
-        spider_times = spider_times + 1
-        time.sleep(180)
+
+    account = input("账号: ")
+    password = input("密码: ")
+    payload = {'account': account, 'password': password, 'device_code': get_mac_address()}
+    r = requests.post('http://59.110.160.234:5000/spider/api/v1/users/login', data=payload)
+    if 'error' in eval(r.text):
+        print(eval(r.text)['error'])
+    else:
+        index = 0
+        spider_times = 0
+        account = getAccount(0)
+        login(account['account'], account['password'])
+        while True:
+            print('Loop')
+            if spider_times != 0 and spider_times % config.switch_account_interval == 0:
+                index = index + 1
+                if index >= len(config.weibo_accounts):
+                    index = 0
+                account = getAccount(index)
+                try:
+                    login(account['account'], account['password'])
+                except Exception as e:
+                    print(e.args)
+            t = threading.Thread(target=perfirm, args=(
+            config.spider_user_ids, config.spider_keywords, config.spider_extra_keywords, config.spider_interval, config.private_message))
+            t.start()
+            spider_times = spider_times + 1
+            time.sleep(180)
+

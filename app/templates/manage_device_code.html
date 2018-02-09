@@ -15,9 +15,6 @@
     <div class="box box-info">
         <div class="box-header with-border">
             <h3 class="box-title">机器码</h3>
-            <div class="pull-right box-tools">
-                <button id="btn_add_device_code" class="btn btn-info btn-sm" data-toggle="tooltip">添加</button>
-            </div>
         </div>
         <!-- form start -->
         <div class="box-body">
@@ -67,7 +64,7 @@
 
         $("#btn_add_device_code").click(function () {
             $.ajax({
-                url: 'http://47.93.191.41:5000/spider/api/v1/device_codes',
+                url: 'http://59.110.160.234:5000/spider/api/v1/device_codes',
                 type: 'POST',
                 success: function (result) {
                     $("#table_device_code").DataTable().ajax.reload();
@@ -79,7 +76,7 @@
         });
         $("#btn_modal_bind_user").click(function () {
             $.ajax({
-                url: 'http://47.93.191.41:5000/spider/api/v1/device_codes/' + $("#btn_modal_bind_user").attr("code_id"),
+                url: 'http://59.110.160.234:5000/spider/api/v1/device_codes/' + $("#btn_modal_bind_user").attr("code_id"),
                 type: 'POST',
                 data: {
                     user_id: $("#input_user_id").val()
@@ -109,7 +106,7 @@
             "ordering": false,
             "info":false,
             "ajax": {
-                "url": "http://47.93.191.41:5000/spider/api/v1/device_codes",
+                "url": "http://59.110.160.234:5000/spider/api/v1/device_codes",
                 "type": "get",
             },
             "columns": [
@@ -161,7 +158,7 @@
             var code_id = $(this).parents('tr').children('td').children('label').attr('name');
             var user_id = $(this).parents('tr').children('td').children('h5').attr('name');
             $.ajax({
-                url: 'http://47.93.191.41:5000/spider/api/v1/device_codes/' + code_id,
+                url: 'http://59.110.160.234:5000/spider/api/v1/device_codes/' + code_id,
                 type: 'PUT',
                 data: {
                     user_id: user_id
